@@ -10149,7 +10149,7 @@
 		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp yes)
 		(uuid "0cc23fc0-aea8-4a3e-8026-853572924660")
@@ -11205,7 +11205,7 @@
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
-		(on_board no)
+		(on_board yes)
 		(dnp no)
 		(uuid "31fac087-c518-413e-9747-3db52f85f190")
 		(property "Reference" "J5"
