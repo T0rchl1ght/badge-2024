@@ -1,7 +1,7 @@
 # OpenTaxus 
 
-| Readme | [The Attribution Game](attribution) | [Trick or Treat Game](trickortreat) | [Badge Hardware](hardware) |
-| ------------------- | --------------------------------------------- | --------------------------------------------- | ------------------------------------ |
+| [Readme](/) | [The Attribution Game](/attribution) | [Trick or Treat Game](/trickortreat) | [Badge Hardware](/hardware) |
+| ----------- | ------------------------------------ | ------------------------------------ | --------------------------- |
 
 Opentaxus is a permissively licensed set of hardware, software, and tooling to help as a starting point for customized conference badges.
 
@@ -14,7 +14,7 @@ OpenTaxus is intended to get you started with a working system, allowing you to 
 
 There are currently two games for OpenTaxus. Each is in it's own subdirectory. Right now you'll just pick one (or make a new one) for your conference badge:
 
-### [The Attribution Game](attribution)
+### [The Attribution Game](/attribution)
 
 Similar to the board game Clue or some versions of Carmen Sandiego,
 you need to figure out who the threat actor, attack tool, and victim
@@ -24,7 +24,7 @@ at the conference.
 
 The Attribution Game was designed for [LABScon 2023](https://www.labscon.io/) and then revised and improved for [BSidesSF 2024](https://bsidessf.org/)
 
-### [Trick or Treat Game](trickortreat) 
+### [Trick or Treat Game](/trickortreat) 
 
 In this game, you Trick-or-Treat, trading virtual candy with other conference attendees. Once you have collected enough, you can cash out your virtual candy for real candy or prizes.
 

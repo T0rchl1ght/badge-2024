@@ -1,11 +1,10 @@
-# OpenTaxus 
+# The Attribution Game 
 
-| [Readme](README.md) | [The Attribution Game](attribution/README.md) | [Trick or Treat Game](trickortreat/README.md) | [Badge Hardware](hardware/Readme.md) |
-| ------------------- | --------------------------------------------- | --------------------------------------------- | ------------------------------------ |
+| [Readme](/) | [The Attribution Game](/attribution) | [Trick or Treat Game](/trickortreat) | [Badge Hardware](/hardware) |
+| ----------- | ------------------------------------ | ------------------------------------ | --------------------------- |
 
 ## Badge Game
 
-The OpenTaxus Badge is designed for playing the Attribution Game.
 Similar to the board game Clue or some versions of Carmen Sandiego,
 you need to figure out who the threat actor, attack tool, and victim
 are for each round of the game. You do this by trading cards (or
@@ -25,7 +24,7 @@ You can check your collected cards by scrolling right from the "OpenTaxus" scree
 
 When you collect enough cards, the one remaining is the solution that completes the phrase. There are 6 games to play through - try them all!
 
-Please see [Playing the Game](docs/GAME.md) for more details
+Please see [Using the Badge](/attribution/GAME.md) for more details about interacting with the badge and [Playing the Game](/attribution/GAME.md) for more details about gameplay.
 
 ## Repo Contents
 
@@ -41,6 +40,8 @@ The badge software is a fork of the Labscon badge software, further mangled by @
 ## Event Badge Designer Instructions
 
 OpenTaxus is intended to be be a drop-in electronic badge that works from the start. While you can use the badge as it's presented here if you plan to use it for an event or organization, you may want to customize the appearance of the badge, and possibly some of the text and programming. 
+
+Please see [Developer Instrucitons](/attribution/DEVELOP.md) for more details
 
 ### Suggested customizations:
 	

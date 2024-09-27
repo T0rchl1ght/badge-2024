@@ -1,7 +1,7 @@
 # OpenTaxus 
 
-| [Readme](README.md) | [The Attribution Game](attribution/README.md) | [Trick or Treat Game](trickortreat/README.md) | [Badge Hardware](hardware/Readme.md) |
-| ------------------- | --------------------------------------------- | --------------------------------------------- | ------------------------------------ |
+| [Readme](/) | [The Attribution Game](/attribution) | [Trick or Treat Game](/trickortreat) | [Badge Hardware](/hardware) |
+| ----------- | ------------------------------------ | ------------------------------------ | --------------------------- |
 
 ## Badge Game
 
