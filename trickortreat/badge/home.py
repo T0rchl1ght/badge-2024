@@ -87,36 +87,24 @@ class home:
             if self.dpad.u.fell:
                 # u increments through the character set for names
                 ky = (ky - 1) % len(keyboard)
-            #                player_name[nindex] = keyboard[ky][kx]
-            #                self.disp.setHeader("handle:"+"".join(player_name))
-            #                self.disp.setTextCursor(keyboard, (kx,ky))
             elif self.dpad.d.fell:
                 # d decrements through the character set for names
                 ky = (ky + 1) % len(keyboard)
-            #                player_name[nindex] = keyboard[ky][kx]
-            #                self.disp.setHeader("handle:"+"".join(player_name))
-            #                self.disp.setTextCursor(keyboard, (kx,ky))
             elif self.dpad.l.fell:
                 # l moves to the previous char
                 kx = (kx - 2) % len(keyboard[ky])
             elif self.dpad.r.fell:
                 # r moves to the next char
                 kx = (kx + 2) % len(keyboard[ky])
-            #                player_name[nindex] = keyboard[ky][kx]
-            #                self.disp.setHeader("handle:"+"".join(player_name))
-            #                self.disp.setTextCursor(keyboard, (kx,ky))
             elif self.dpad.x.fell:
                 # "," means cycle keyboards
                 if keyboard[ky][kx] == ",":
                     kbindex = (kbindex + 1) % len(keyboards)
                     keyboard = keyboards[kbindex]
-                #                    self.disp.setTextCursor(keyboard, (kx,ky))
                 # "<" means backspace
                 elif keyboard[ky][kx] == "<" and nindex > 0:
                     player_name[nindex] = " "
                     nindex = nindex - 1
-                #                    player_name[nindex] = keyboard[ky][kx]
-                #                    self.disp.setHeader("handle:"+"".join(player_name))
                 # ">" means done.
                 elif keyboard[ky][kx] == ">":
                     player_name[nindex] = "\n"
@@ -138,8 +126,6 @@ class home:
             player_name[nindex] = keyboard[ky][kx]
             self.disp.setHeader("handle:" + "".join(player_name))
             self.disp.setTextCursor(keyboard, (kx, ky))
-
-    #            time.sleep(0.01)
 
     def update(self):
         # show contents, process keypresses
