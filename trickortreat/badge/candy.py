@@ -20,7 +20,7 @@ class candies:
         self.y=0
 
         #Create the title in black text on the existing white header bar
-        self.header=label.Label(terminalio.FONT,text="Clues, Game 0", color=BLACK, x=8, y=8)
+        self.header=label.Label(terminalio.FONT,text="Candy, Game 0", color=BLACK, x=8, y=8)
         self.group.append(self.header)
 
         #create a layout of all the candies using a sprite table
@@ -49,7 +49,7 @@ class candies:
 
     def set_cards(self):
         #update header based on current game number
-        self.header.text="Clues, game # " + str(self.game.game_num)
+        self.header.text="Candy, game # " + str(self.game.game_num)
         #new data structure. todo Need to clarify x,y to type,candy mapping.
         #for row,candytype in enumerate(self.game.candies):
         for row,candytype in enumerate(self.game.candies.values()):
