@@ -7,13 +7,17 @@ import adafruit_rsa
 import json
 from math import ceil
 
-# number of variants to generate
-working_dir = os.path.dirname(os.path.realpath(__file__))
+#this should do all the event-specific stuff
+# todo: move candies and badge count to config file somewhere?
+# todo: regenerate signatures if a new key was generated
+# todo: make sure there's space for badge ID's in signatures dictionary
+# todo: integrate with flash.py
 
-hash_method="SHA-256"
 candies=["Sour Patch Kids","Haribo Gummies","Smarties","Reese's Cups","Twix","Snickers"]
 badge_count=20
+hash_method="SHA-256"
 
+#if keys are present, load them. if not, generate them
 try:
     with open("priv.json", "r") as f:
         private_obj = json.loads(f.read())
@@ -26,6 +30,7 @@ except Exception as e:
     private_obj = { "private_key_arguments": [private_key.n, private_key.e,
                     private_key.d, private_key.p, private_key.q]}
 
+    #probably should remove this since it's uncessessary and redundant to priv.json
     f=open("pub.json", "w")
     f.write(json.dumps(public_obj))
     f.close()
@@ -41,7 +46,7 @@ except Exception as e:
 print(public_key)
 print(private_key)
 
-# set the random seed so that game files are deterministic (not used in trick or treat)
+# check for seed, if not present, set the random seed so that game files are deterministic (not used in trick or treat)
 try:
     with open("seed.txt", 'r') as file:
         seed = file.read()
@@ -59,6 +64,7 @@ print("seed:", seed)
 
 signatures={}
 
+# if signatures are present, load them. If not, generate them.
 try:
     with open("candies.json", 'r') as f:
         signatures = json.loads(f.read())
