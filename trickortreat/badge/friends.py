@@ -5,7 +5,7 @@ BLACK=0x000000
 WHITE=0xFFFFFF
 
 #alibis manage the alibi list. This persists across games. since one alibi can give
-#you multiple clues, there's a little more work to add that list of clues
+#you multiple candies, there's a little more work to add that list of candies
 class alibis:
     def __init__(self, l_disp,  dpad, game):
         #self.group=group

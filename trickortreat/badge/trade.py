@@ -15,7 +15,7 @@ WHITE=0xFFFFFF
 #this manages the trading of data with others. Unlike the other views,
 #this one is blocking during RX (though this could probably be fixed).
 #This class manages the crc check to ensure valid data is tx/rx, but
-#game.check_clue does the data structure validation and update
+#game.check_candy does the data structure validation and update
 class trade:
     collect()
     state="transmitting"
@@ -39,7 +39,7 @@ class trade:
         """
 
         self.rxname=None
-        self.rxclue=None
+        self.rxcandy=None
 
     def update(self):
         #show trade page
@@ -67,16 +67,16 @@ class trade:
                     rxval=self.ir.readbytes()
                     #print(f"RX: {rxval}")
                     if rxval.count(',') == 4:
-                        self.rxname,self.game_num,self.rxclue,self.rxsignature,chksum= rxval.split(',')
-                        print(f"RX: {chksum}, {self.rxclue}, {self.rxname},{self.rxsignature}")
+                        self.rxname,self.game_num,self.rxcandy,self.rxsignature,chksum= rxval.split(',')
+                        print(f"RX: {chksum}, {self.rxcandy}, {self.rxname},{self.rxsignature}")
                         try:
                             #check crc is valid.
-                            if bytearray(hex(crc32(bytearray(",".join([self.rxname,self.game_num,self.rxclue,self.rxsignature]),'utf8'))),'utf8') != chksum:
+                            if bytearray(hex(crc32(bytearray(",".join([self.rxname,self.game_num,self.rxcandy,self.rxsignature]),'utf8'))),'utf8') != chksum:
                                 print("[!] Invalid Checksum")
                                 self.state="error"
                                 self.disk.setText("receive error :(\n^ try again\nv cancel")
                             #check signature
-                            elif verify(self.rxclue.encode(),a2b_base64(self.rxsignature[1:]),self.game.pubkey):
+                            elif verify(self.rxcandy.encode(),a2b_base64(self.rxsignature[1:]),self.game.pubkey):
                                 print("signature ok")
                                 if int(self.game_num) != int(self.game.game_num):
                                     print("different game nums")
@@ -92,16 +92,16 @@ class trade:
                                         if self.dpad.r.fell:
                                             self.game.game_num=(self.game_num)
                                             self.game.game_file="data/game"+str(self.game.game_num)+".csv"
-                                            self.game.read_clues()
+                                            self.game.read_candies()
                                             break
                                 #check that strings are not none
-                                if (int(self.game_num) == int(self.game.game_num)) and self.rxclue is not None and self.rxname is not None and self.game.check_clue(self.rxclue, self.rxname):
-                                    #if the clue was valid, move to responding
+                                if (int(self.game_num) == int(self.game.game_num)) and self.rxcandy is not None and self.rxname is not None and self.game.check_candy(self.rxcandy, self.rxname):
+                                    #if the candy was valid, move to responding
                                     print("received")
                                     self.state="responding"
                                     sleep(.5)
                             else:
-                                #if clue was invalid, we got an error
+                                #if candy was invalid, we got an error
                                 #todo: this should probably be retry since tx/rx is more robust now
                                 print("receive error")
                                 self.state="error"
@@ -120,7 +120,7 @@ class trade:
                     self.disp.setText("receiving{}".format((self.timeout - ticks_ms()) // 1000))
                     #print("nothing received yet",self.timeout,ticks_ms())
 
-            #responding state. Send our clue one more time
+            #responding state. Send our candy one more time
             elif self.state == "responding":
                 print("responding")
                 self.disp.setText("responding")
@@ -128,11 +128,11 @@ class trade:
 #                self.ir.writebytes(self.game.mytxval)
                 #done responding. Go to success state
                 self.state="success"
-                print(self.rxname,"\nsaid it wasn't\n",self.rxclue)
+                print(self.rxname,"\nsaid it wasn't\n",self.rxcandy)
                 self.disp.setText([
                     "{}".format(self.rxname),
                     "said it wasn't",
-                    "{}".format(self.rxclue)
+                    "{}".format(self.rxcandy)
                 ])
                 if self.game.unsolved==0:
                     self.state="solved"
@@ -151,12 +151,12 @@ class trade:
                  if self.dpad.l.fell or self.dpad.r.fell:
                      retval="home"
                  elif self.dpad.l.fell:
-                     retval="clues"
+                     retval="candies"
                  elif self.dpad.r.fell:
                      self.game.game_num=(self.game.game_num+1)%8
                      self.game.game_file="data/game"+str(self.game.game_num)+".csv"
-                     self.game.read_clues()
-                     retval="clues"
+                     self.game.read_candies()
+                     retval="candies"
             elif self.dpad.d.fell:
                 retval=0
             elif self.dpad.u.fell:

@@ -163,9 +163,9 @@ class home:
             if self.dpad.x.fell:
                 self.thanks = not self.thanks
             elif self.dpad.l.fell:
-                return "alibis"
+                return "friends"
             elif self.dpad.r.fell:
-                return "clues"
+                return "candies"
         else:
             # this is causing oom!
             if self.disp.setText(self.game.solution_string):
@@ -174,9 +174,9 @@ class home:
                 elif self.dpad.d.fell:
                     return "sleep"
             if self.dpad.l.fell:
-                return "alibis"
+                return "friends"
             elif self.dpad.r.fell:
-                return "clues"
+                return "candies"
             elif self.dpad.x.fell:
                 self.thanks = not self.thanks
         return "home"

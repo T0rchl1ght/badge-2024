@@ -9,54 +9,54 @@ from adafruit_rsa import PublicKey
 # loading the data from files, updating it, and writing it back.
 class game_data:
     # game_num=0  # set in __init__
-    myclue=None
+    mycandy=None
     signature=""
     # myname=None # set in __init__ via call to read_myname()
     mytxval=None
     game_file="data/game1.csv"
-    alibi_file="data/alibis.csv"
+    friends_file="data/friends.csv"
 
     #initialize all the data. Read all 3 files and load into memory
     def __init__(self,game_num=0):
         self.game_num=game_num
         self.read_name()
-        self.read_alibis()
+        self.read_friends()
         self.pubkey=self.read_pubkey()
         print(self.pubkey)
         self.game_file="data/game"+str(game_num)+".csv"
-        self.read_clues()
+        self.read_candies()
 
-    #check a clue, and if valid for this game, add it to the structure.
-    def check_clue(self,newclue,alibi):
-        #if we haven't met the alibi before, a them to the list, and flush to disk
-        if alibi not in self.alibis.keys():
-            self.alibis[alibi]=[newclue]
-        # if we have, append the clue to the list of clues
+    #check a candy, and if valid for this game, add it to the structure.
+    def check_candy(self,newcandy,friend):
+        #if we haven't met the friend before, a them to the list, and flush to disk
+        if friend not in self.friends.keys():
+            self.friends[friend]=[newcandy]
+        # if we have, append the candy to the list of candies
         else:
-            print(f"Alibi {alibi} already known, appending")
-            #check for duplicate clue in this list
-            if newclue not in self.alibis[alibi]:
-                self.alibis[alibi].append(newclue)
-        self.write_alibis()
-        #iterate over all clues. If we have the clue, mark it collected, log the alibi,
+            print(f"Friend {friend} already known, appending")
+            #check for duplicate candy in this list
+            if newcandy not in self.friends[friend]:
+                self.friends[friend].append(newcandy)
+        self.write_friends()
+        #iterate over all candies. If we have the candy, mark it collected, log the friend,
         #flag it so the display knows to update it, and flush to disk
         match=False
-        for typename,cluetype in self.clues.items():
-            if newclue in cluetype["known"]:
-                print("clue already shared by ",cluetype["known"][newclue]," but thanks anyway "+alibi)
+        for typename,candytype in self.candies.items():
+            if newcandy in candytype["known"]:
+                print("candy already shared by ",candytype["known"][newcandy]," but thanks anyway "+friend)
                 match=True
                 break
-            elif len(cluetype["unknown"])>1 and newclue in cluetype["unknown"]:
-                print("new clue!",newclue)
-                cluetype["known"][newclue]=alibi
-                del cluetype["unknown"][newclue]
-                self.check_for_solution(typename,cluetype)
-                cluetype["updated"]=True
+            elif len(candytype["unknown"])>1 and newcandy in candytype["unknown"]:
+                print("new candy!",newcandy)
+                candytype["known"][newcandy]=friend
+                del candytype["unknown"][newcandy]
+                self.check_for_solution(typename,candytype)
+                candytype["updated"]=True
                 match=True
                 break
         if match :
-            self.write_clues()
-            return newclue
+            self.write_candies()
+            return newcandy
         return False
 
     #load name from file - if it's not there, set to unknown
@@ -86,9 +86,9 @@ class game_data:
             return False
         return True
 
-    def check_for_solution(self,typename,cluetype):
-        if len(cluetype["unknown"]) == 1:
-            answer=list(cluetype["unknown"].keys())[0]
+    def check_for_solution(self,typename,candytype):
+        if len(candytype["unknown"]) == 1:
+            answer=list(candytype["unknown"].keys())[0]
             self.solution_string=self.solution_string.replace("["+typename+"]",answer)
             print(self.solution_string)
             self.unsolved-=1
@@ -96,21 +96,21 @@ class game_data:
             if self.unsolved==0:
                 print("full solution!!")
 
-    #read csv file of clues for this game. Can be called again
+    #read csv file of candies for this game. Can be called again
     #to change to a different game number
-    def read_clues(self):
+    def read_candies(self):
         try:
             with open(self.game_file, 'r') as file:
                 csv=circuitpython_csv.reader(file)
-                #dict to hold clue types which hold clues
-                self.clues={}
-                #first value tells us what type of clue it is
+                #dict to hold candy types which hold candies
+                self.candies={}
+                #first value tells us what type of candy it is
                 self.solution_string="#T used #A against #V"
                 for row in csv:
                     if row[0] == "*":
                         #print(row)
-                        self.myclue=row[1]
-                        #print(self.myclue,row[2],self.signature)
+                        self.mycandy=row[1]
+                        #print(self.mycandy,row[2],self.signature)
                         #todo: this should be added to game files as row[2]
                         self.signature=a2b_base64(row[2])
                         self.signature=row[2]
@@ -121,24 +121,24 @@ class game_data:
                     #make sure we have enough data
                     elif len(row) > 3:
                         status="unknown" if row[3]=="" else "known"
-                        #if we haven't seen this cluetype before, create the dict
-                        if row[0] not in self.clues:
-                            self.clues[row[0]]={"known":{},"unknown":{},"updated":True}
-                        #and enter the clue into the dict
-                        self.clues[row[0]][status][row[1]]=row[3]
+                        #if we haven't seen this candytype before, create the dict
+                        if row[0] not in self.candies:
+                            self.candies[row[0]]={"known":{},"unknown":{},"updated":True}
+                        #and enter the candy into the dict
+                        self.candies[row[0]][status][row[1]]=row[3]
             # count of unsolved categories
-            self.unsolved=len(self.clues)
+            self.unsolved=len(self.candies)
             # check for solutions, count unsolved categories
-            for typename,cluetype in self.clues.items():
-                self.check_for_solution(typename,cluetype)
-                cluetype["updated"]=True
+            for typename,candytype in self.candies.items():
+                self.check_for_solution(typename,candytype)
+                candytype["updated"]=True
             print("#unsolved: ", self.unsolved)
 
-            print(self.clues)
-            #add our clue to the table
-            self.check_clue(self.myclue,self.myname)
+            print(self.candies)
+            #add our candy to the table
+            self.check_candy(self.mycandy,self.myname)
             #calculate the message we'll send when we trade.
-            transmit_data=bytearray(",".join([self.myname,str(self.game_num),self.myclue,str(self.signature)]),'utf8')
+            transmit_data=bytearray(",".join([self.myname,str(self.game_num),self.mycandy,str(self.signature)]),'utf8')
             #calculate CRC
             crc = hex(crc32(transmit_data))#[2:]
             #crc = str(crc32(transmit_data))
@@ -148,65 +148,65 @@ class game_data:
         except OSError:
             print("Error reading from file:", self.game_file)
 
-    #essentially 'resets' the current game, wiping all clues then adding yours back
-    def wipe_clues(self):
-        ## new clue structure
-        for cluetype in self.clues.values():
-            for clue in cluetype["known"]:
-                cluetype["unknown"][clue]=""
-            cluetype["known"]={}
-            cluetype["updated"]=True
-        print(self.clues)
-        self.check_clue(self.myclue,self.myname)
-        self.write_clues()
+    #essentially 'resets' the current game, wiping all candies then adding yours back
+    def wipe_candies(self):
+        ## new candy structure
+        for candytype in self.candies.values():
+            for candy in candytype["known"]:
+                candytype["unknown"][candy]=""
+            candytype["known"]={}
+            candytype["updated"]=True
+        print(self.candies)
+        self.check_candy(self.mycandy,self.myname)
+        self.write_candies()
 
-    #write clues csv to disk so it persists through power cycles
-    def write_clues(self):
-        #should be called every time we add a clue?
+    #write candies csv to disk so it persists through power cycles
+    def write_candies(self):
+        #should be called every time we add a candy?
         try:
-            ## new clue structure
+            ## new candy structure
             fhandle = open(self.game_file, 'w')
             fhandle.write("#,"+self.solution_string+"\n")
-            for cluetype in self.clues.keys():
-                for clue in self.clues[cluetype]["known"]:
-                    print(cluetype+","+clue+","+self.clues[cluetype]["known"][clue])
-                    fhandle.write(cluetype+","+clue+",0,"+self.clues[cluetype]["known"][clue]+"\n")
-                for clue in self.clues[cluetype]["unknown"]:
-                    print(cluetype+","+clue+",0,")
-                    fhandle.write(cluetype+","+clue+",0,"+"\n")
-            print("*,"+str(self.myclue))
-            #tack on your clue at the end
-            fhandle.write("*,"+str(self.myclue)+","+self.signature)
+            for candytype in self.candies.keys():
+                for candy in self.candies[candytype]["known"]:
+                    print(candytype+","+candy+","+self.candies[candytype]["known"][candy])
+                    fhandle.write(candytype+","+candy+",0,"+self.candies[candytype]["known"][candy]+"\n")
+                for candy in self.candies[candytype]["unknown"]:
+                    print(candytype+","+candy+",0,")
+                    fhandle.write(candytype+","+candy+",0,"+"\n")
+            print("*,"+str(self.mycandy))
+            #tack on your candy at the end
+            fhandle.write("*,"+str(self.mycandy)+","+self.signature)
             fhandle.close()
         except OSError:
-            print("Error writing clues file:", self.game_file)
+            print("Error writing candies file:", self.game_file)
             return False
         return True
 
-    def read_alibis(self):
+    def read_friends(self):
         try:
-            self.alibis={}
-            with open(self.alibi_file, 'r') as file:
+            self.friends={}
+            with open(self.friend_file, 'r') as file:
                 for row in circuitpython_csv.reader(file):
-                    self.alibis[row[0]]=row[1:]
-            #print(self.alibis)
+                    self.friends[row[0]]=row[1:]
+            #print(self.friends)
         except OSError:
-            print("Error reading from file:", self.alibi_file)
+            print("Error reading from file:", self.friend_file)
 
-    #clear list of alibis except for yourself, and flush to disk
-    def wipe_alibis(self):
-        self.alibis=[[self.myname]]
-        self.write_alibis()
+    #clear list of friends except for yourself, and flush to disk
+    def wipe_friends(self):
+        self.friends=[[self.myname]]
+        self.write_friends()
 
-    def write_alibis(self):
+    def write_friends(self):
         try:
-            fhandle = open(self.alibi_file, 'w')
-            for alibi_name,alibi in self.alibis.items():
-                fhandle.write(alibi_name+","+",".join(alibi))
-                print(alibi_name,",".join(alibi))
+            fhandle = open(self.friend_file, 'w')
+            for friend_name,friend in self.friends.items():
+                fhandle.write(friend_name+","+",".join(friend))
+                print(friend_name,",".join(friend))
                 fhandle.write("\n")
         except OSError:
-            print("Error writing alibi file:", self.alibi_file)
+            print("Error writing friend file:", self.friend_file)
             return False
         return True
 

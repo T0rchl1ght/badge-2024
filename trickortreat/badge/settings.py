@@ -56,9 +56,9 @@ class settings:
         if self.dpad.d.fell:
             self.x =(self.x+1)%len(self.settings)
         if self.dpad.l.fell:
-            return "clues"
+            return "candies"
         if self.dpad.r.fell:
-            return "alibis"
+            return "friends"
         if self.dpad.x.fell:
             if self.details.hidden==True:
 
@@ -107,8 +107,8 @@ class settings:
                             while True:
                                 pass
                 elif self.x==5:
-                    #clear clues then resume
-                    self.det.text="Wipe ALL clues?\n'<' cancel\n'>' wipe"
+                    #clear candies then resume
+                    self.det.text="Wipe ALL candies?\n'<' cancel\n'>' wipe"
                     self.details.hidden=False
                     while self.details.hidden==False:
                         #block until cancelled(l) or confirmed (r)
@@ -116,7 +116,7 @@ class settings:
                         if self.dpad.l.fell:
                             self.details.hidden=True
                         if self.dpad.r.fell:
-                            self.game.wipe_clues()
+                            self.game.wipe_candies()
                             self.det.text="Clues Wiped!\n'<' to return"
                 elif self.x==6:
                     #clear contacts
@@ -128,8 +128,8 @@ class settings:
                         if self.dpad.l.fell:
                             self.details.hidden=True
                         if self.dpad.r.fell:
-                            self.game.wipe_alibis()
-                            self.det.text="Alibis Wiped!\n'<' to return"
+                            self.game.wipe_friends()
+                            self.det.text="Friends Wiped!\n'<' to return"
                 elif self.x==7:
                     #leds off
                     self.leds.current_pattern=0
@@ -138,7 +138,7 @@ class settings:
                     self.game.game_num=(self.game.game_num+1)%8
                     self.game.game_file="data/game"+str(self.game.game_num)+".csv"
                     self.settings[self.x]="Game #"+str(self.game.game_num)
-                    self.game.read_clues()
+                    self.game.read_candies()
                 elif self.x==9:
                     #set sleep behavior of the leds
                     self.det.text="LEDs when idle?\n'<' off  pause '>'\n 'v' don't sleep"

@@ -5,8 +5,8 @@ from disp import disp
 
 from leds import led_control
 from home import home
-from clues import clues
-from alibis import alibis
+from candies import candies
+from friends import friends
 from settings import settings
 from trade import trade
 from sleep import sleep
@@ -37,9 +37,9 @@ gc.collect()
 
 #finally, create the other view pages, most of which need to access
 #a single display group, dpad state, and game data
-clues_page=clues(display.cluesgroup,dpad,game)
+candies_page=candies(display.candiesgroup,dpad,game)
 settings_page=settings(display.settingsgroup,dpad,game,leds,l_disp)
-alibis_page=alibis(l_disp,dpad,game)
+friends_page=friends(l_disp,dpad,game)
 trade_page=trade(dpad,game,l_disp)
 sleep_page=sleep(display,dpad,leds)
 gc.collect()
@@ -74,12 +74,12 @@ while True:
     elif page == "settings":
         last_page=page
         page=settings_page.update()
-    elif page == "alibis":
+    elif page == "friends":
         last_page=page
-        page=alibis_page.update()
-    elif page == "clues":
+        page=friends_page.update()
+    elif page == "candies":
         last_page=page
-        page=clues_page.update()
+        page=candies_page.update()
     elif page == "trade":
         page=trade_page.update()
     elif page == "sleep":
