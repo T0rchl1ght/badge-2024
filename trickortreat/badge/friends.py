@@ -4,9 +4,9 @@ import displayio
 BLACK=0x000000
 WHITE=0xFFFFFF
 
-#alibis manage the alibi list. This persists across games. since one alibi can give
+#friends manage the friend list. This persists across games. since one friend can give
 #you multiple candies, there's a little more work to add that list of candies
-class alibis:
+class friends:
     def __init__(self, l_disp,  dpad, game):
         #self.group=group
         self.dpad=dpad
@@ -18,25 +18,25 @@ class alibis:
     def update(self):
         #there are 3 lines displayed. The middle line is the 'selected' one
         #and has a > in front
-        alibinames=list(self.game.alibis.keys())
+        friendnames=list(self.game.friends.keys())
         #self.group.hidden=False
         scroll = False
 
 
         if self.details:
             # ToDo: Convert this into a pretty pop-up
-            self.disp.setHeader(alibinames[self.alibi_selected])
+            self.disp.setHeader(friendnames[self.friend_selected])
             scroll = self.disp.setText( 
-                [alibinames[self.alibi_selected], "said it wasn't:"] + self.game.alibis[alibinames[self.alibi_selected]]
+                [friendnames[self.friend_selected], "said it wasn't:"] + self.game.friends[friendnames[self.friend_selected]]
             )
         else:
-            self.disp.setHeader("Alibis")  # ToDo: it might be nice to show our own name here
-            scroll = self.alibi_selected = self.disp.setTextGetSelect(alibinames)
-            if self.alibi_selected >= 0:
-                print("[alibis] Selected item {} - {}".format(self.alibi_selected, alibinames[self.alibi_selected]))
+            self.disp.setHeader("Friends")  # ToDo: it might be nice to show our own name here
+            scroll = self.friend_selected = self.disp.setTextGetSelect(friendnames)
+            if self.friend_selected >= 0:
+                print("[friends] Selected item {} - {}".format(self.friend_selected, friendnames[self.friend_selected]))
                 self.details = True
                 # skip processing dpad, so we will display the right thing in the next loop
-                return "alibis"
+                return "friends"
 
         if self.dpad.l.fell:
             #self.group.hidden=True
@@ -48,4 +48,4 @@ class alibis:
             return "home"
         elif self.dpad.x.fell:
             self.details = not self.details
-        return "alibis"
+        return "friends"
