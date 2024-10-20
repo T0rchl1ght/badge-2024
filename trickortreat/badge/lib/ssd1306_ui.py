@@ -47,15 +47,15 @@ class ssd1306ui:
         self.pagegroup.append(self.settingsgroup)
 
         """
-        self.alibisgroup = displayio.Group(x=134)
-        self.pagegroup.append(self.alibisgroup)
+        self.friendsgroup = displayio.Group(x=134)
+        self.pagegroup.append(self.friendsgroup)
         """
 
         self.homegroup = displayio.Group(x=264)
         self.pagegroup.append(self.homegroup)
 
-        self.cluesgroup = displayio.Group(x=394)
-        self.pagegroup.append(self.cluesgroup)
+        self.candiesgroup = displayio.Group(x=394)
+        self.pagegroup.append(self.candiesgroup)
 
         self.pagegroup.append(box(3,64,WHITE,000,0))
         self.pagegroup.append(box(4,64,WHITE,129,0))
@@ -85,9 +85,9 @@ class ssd1306ui:
             self.starttime=ticks_ms()
             self.startx=self.pagegroup.x
             if groupname == "settings": self.targetx=0
-            elif groupname == "alibis": self.targetx=-260
+            elif groupname == "friends": self.targetx=-260
             elif groupname == "home": self.targetx=-260
-            elif groupname == "clues": self.targetx=-390
+            elif groupname == "candies": self.targetx=-390
             # sleep and trade don't need to move x
             else: self.targetx=self.pagegroup.x
 

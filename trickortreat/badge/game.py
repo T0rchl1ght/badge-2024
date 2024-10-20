@@ -186,12 +186,12 @@ class game_data:
     def read_friends(self):
         try:
             self.friends={}
-            with open(self.friend_file, 'r') as file:
+            with open(self.friends_file, 'r') as file:
                 for row in circuitpython_csv.reader(file):
                     self.friends[row[0]]=row[1:]
             #print(self.friends)
         except OSError:
-            print("Error reading from file:", self.friend_file)
+            print("Error reading from file:", self.friends_file)
 
     #clear list of friends except for yourself, and flush to disk
     def wipe_friends(self):
@@ -200,13 +200,13 @@ class game_data:
 
     def write_friends(self):
         try:
-            fhandle = open(self.friend_file, 'w')
+            fhandle = open(self.friends_file, 'w')
             for friend_name,friend in self.friends.items():
                 fhandle.write(friend_name+","+",".join(friend))
                 print(friend_name,",".join(friend))
                 fhandle.write("\n")
         except OSError:
-            print("Error writing friend file:", self.friend_file)
+            print("Error writing friend file:", self.friends_file)
             return False
         return True
 

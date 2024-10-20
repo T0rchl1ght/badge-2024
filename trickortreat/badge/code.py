@@ -5,7 +5,7 @@ from disp import disp
 
 from leds import led_control
 from home import home
-from candies import candies
+from candy import candies
 from friends import friends
 from settings import settings
 from trade import trade

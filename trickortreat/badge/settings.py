@@ -11,7 +11,7 @@ WHITE=0xFFFFFF
 #data wiping, and game advancing options
 class settings:
     #todo: use some fancy python data structure to map strings to settings
-    settings=["Sponsors","LED Style","LED Color","LED Brightness","Clear Name","Clear Clues","Clear Contacts","LEDs Off","Advance Game","LED Sleep Mode"]
+    settings=["Sponsors","LED Style","LED Color","LED Brightness","Clear Name","Clear Candies","Clear Contacts","LEDs Off","Advance Game","LED Sleep Mode"]
 
     def __init__(self, group, dpad, game, leds, l_disp):
         self.group=group
@@ -117,10 +117,10 @@ class settings:
                             self.details.hidden=True
                         if self.dpad.r.fell:
                             self.game.wipe_candies()
-                            self.det.text="Clues Wiped!\n'<' to return"
+                            self.det.text="Candies Wiped!\n'<' to return"
                 elif self.x==6:
                     #clear contacts
-                    self.det.text="Wipe all Alibis?\n'<' cancel\n'>' wipe"
+                    self.det.text="Wipe all Friends?\n'<' cancel\n'>' wipe"
                     self.details.hidden=False
                     while self.details.hidden==False:
                         #block until cancelled(l) or confirmed (r)
