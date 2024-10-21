@@ -29,6 +29,7 @@ class disp:
         self.dpad = dpad
         self.group = group
         self.body_text = ""
+        self.blankEndRows=True
 
         # Create a header and a text block area
         self.head = Label(terminalio.FONT, text="", color=__BLACK, background_color=__WHITE, x=0, y=0)
@@ -188,7 +189,7 @@ class disp:
         
 
 
-    def setTextGetSelect(self,input):
+    def setTextGetSelect(self,input,):
         """
             Displays text with a left side selection marker
             Input 
@@ -200,32 +201,57 @@ class disp:
                     dpad select causes return
                     dpad left/right causes return
                 Shows a highlighted selection indicator at the row that will be returned if clicked
+                self.blankEndRows allows an empty top and bottom row to show end of list
 
             returns
                 - the array value of the selected item
                 - dpad left/right result
         """
-        # Return whether caller should handle scrolling up or down
-        scroll = False
-
         # Sort out any dpad motions
         if self.body_text == input:
             if self.dpad.u.fell:
                 # cursorRow up until 0, curTopRow up until 0, no wrap
-                if self.cursorRow <= 0:
-                    self.curTopRow = self.curTopRow - 1 if self.curTopRow > 0 else 0
+                # move cursor up one
+                self.cursorRow -= 1
+                
+                #if that scrolls off top, move the view window up
+                if self.cursorRow < 0:
+                    self.curTopRow += self.cursorRow
                     self.cursorRow = 0
-                    scroll = True
-                else:
-                    self.cursorRow -= 1
+
+                #if view window is off the top, slide it to the top
+                if self.curTopRow < 0:
+                    self.curTopRow=0
+                    #if we want a blank top line - then slide it up one
+                    if self.blankEndRows:
+                        self.curTopRow = -1
+                        self.cursorRow = 1
+
             elif self.dpad.d.fell:
                 # cursorRow down until 2, curTopRow down until full screen are last lines
-                if self.cursorRow >= 2:
-                    self.curTopRow = self.curTopRow + 1 if self.curTopRow + 2 > len(input) else len(input) - 3
-                    self.cursorRow = 2  # cursorRow should never be above 2, this is a safety only
-                    scroll = True
-                else:
-                    self.cursorRow = self.cursorRow + 1 if self.cursorRow < len(input) - 1 else len(input) - 1
+                # move cursor down one
+                rows = len(input)
+                self.cursorRow += 1
+                
+                #if that scrolls off bottom, move the view window down
+                if self.cursorRow > 2:
+                    self.curTopRow += 1
+                    self.cursorRow = 2
+
+                #if view window is off the bottom, slide it to the bottom
+                if self.curTopRow > len(input)-3:
+                    self.curTopRow=rows-3
+                    #if we want a blank bottom line - then slide it down one
+                    if self.blankEndRows:
+                        self.curTopRow += 1
+                        self.cursorRow = 1
+                        
+#                if self.cursorRow >= 2:
+#                    self.curTopRow = self.curTopRow + 1 if self.curTopRow + 2 > len(input) else len(input) - 3
+#                    self.cursorRow = 2  # cursorRow should never be above 2, this is a safety only
+#                    scroll = True
+#                else:
+#                    self.cursorRow = self.cursorRow + 1 if self.cursorRow < len(input) - 1 else len(input) - 1
             elif self.dpad.x.fell:
                 return self.curTopRow + self.cursorRow
             else:
@@ -237,8 +263,16 @@ class disp:
             self.curTopRow = 0
             self.cursorRow = 0
 
+        print("Top row:",self.curTopRow,"\ncursor:",self.cursorRow)
+
         # ToDo: put in logic for a fancy line-wrap with prompting here
-        lines = input[self.curTopRow:self.curTopRow + 3]
+        if self.curTopRow < 0:
+            lines = [""]
+            print(lines)
+            lines += input[0:2]
+        else: 
+            lines = input[self.curTopRow:self.curTopRow + 3]
+        print(lines)
         for idx in range(0,len(lines)):
             if len(lines[idx]) > 18:
                 print("[disp.setTextGetSelect] Line too long (18 char limit): {}".format(lines[idx]))
