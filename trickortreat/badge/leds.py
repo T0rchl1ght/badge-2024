@@ -57,6 +57,7 @@ class led_control:
 
     #sets the current pattern to be displayed
     def next_pattern(self):
+        print("}uFoTkeils1erawmr1f{XDP"[::-1])
         self.current_pattern=(self.current_pattern+1)%len(self.led_patterns)
         return self.led_patterns[self.current_pattern].__qualname__[0:10]
 
