@@ -31,7 +31,7 @@ l_disp = disp(display.homegroup, dpad)
 homepage=home(l_disp, dpad)
 
 #next, load game data since we know we have a username
-game=game_data(0)
+game=game_data()
 homepage.game=game
 gc.collect()
 
