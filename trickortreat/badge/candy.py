@@ -25,14 +25,13 @@ class candies:
         #self.group.hidden=False
 
         if self.details:
-            # ToDo: Convert this into a pretty pop-up
             self.disp.setHeader(currentCandyName)
-            self.disp.setText("you have "+str(self.game.candyTally[currentCandyName])+" "+currentCandyName)
+            self.disp.setText("You have "+str(self.game.candyTally[currentCandyName])+" "+currentCandyName)
         else:
             self.disp.setHeader("Candies")  # ToDo: it might be nice to show our own name here
             self.candy_selected = self.disp.setTextGetSelect(candyNames)
             if self.candy_selected >= 0:
-                print("[candies] Selected item {} - {}".format(self.candy_selected, currentCandyName))
+                print("[candies] Selected item {} - {}".format(self.candy_selected, candyNames[self.candy_selected]))
                 self.details = True
                 # skip processing dpad, so we will display the right thing in the next loop
                 return "candies"
