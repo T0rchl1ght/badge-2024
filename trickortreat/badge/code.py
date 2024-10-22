@@ -37,7 +37,7 @@ gc.collect()
 
 #finally, create the other view pages, most of which need to access
 #a single display group, dpad state, and game data
-candies_page=candies(display.candiesgroup,dpad,game)
+candies_page=candies(l_disp,dpad,game)
 settings_page=settings(display.settingsgroup,dpad,game,leds,l_disp)
 friends_page=friends(l_disp,dpad,game)
 trade_page=trade(dpad,game,l_disp)
