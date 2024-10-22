@@ -71,6 +71,7 @@ class ssd1306ui:
         """
 
     def show(self,groupname):
+        #todo: get game-specific stuf out of here if possible? pass targetx instead?
         #print(f'{groupname} -- {self.currentgroup}')
         if groupname==self.currentgroup:
             #no change in group, but do we still need to update animation?
@@ -87,7 +88,7 @@ class ssd1306ui:
             if groupname == "settings": self.targetx=0
             elif groupname == "friends": self.targetx=-260
             elif groupname == "home": self.targetx=-260
-            elif groupname == "candies": self.targetx=-390
+            elif groupname == "candies": self.targetx=-260
             # sleep and trade don't need to move x
             else: self.targetx=self.pagegroup.x
 
