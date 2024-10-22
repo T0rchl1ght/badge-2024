@@ -130,39 +130,27 @@ class home:
     def update(self):
         # show contents, process keypresses
         # self.disp.hidden=False
-        self.disp.setHeader(self.event_name)
+        header=self.event_name
+        body=""
 
         if self.thanks:
-            self.disp.setHeader("Sponsors")
-            if self.disp.setText(
-                [
-                    "Thank you to our",
+            header="Sponsors"
+            body=   ["Thank you to our",
                     "Silver Sponsors:",
                     "BPM",
                     "SecuringHardware.com",
-                ]
-            ):
-                if self.dpad.u.fell:
-                    return "trade"
-                elif self.dpad.d.fell:
-                    return "sleep"
-            if self.dpad.x.fell:
-                self.thanks = not self.thanks
-            elif self.dpad.l.fell:
-                return "friends"
-            elif self.dpad.r.fell:
-                return "candies"
-        else:
-            # this is causing oom!
-            if self.disp.setText(self.game.solution_string):
-                if self.dpad.u.fell:
-                    return "trade"
-                elif self.dpad.d.fell:
-                    return "sleep"
-            if self.dpad.l.fell:
-                return "friends"
-            elif self.dpad.r.fell:
-                return "candies"
-            elif self.dpad.x.fell:
-                self.thanks = not self.thanks
+                    ]
+            
+        self.disp.setHeader(header)
+        if self.disp.setText(body):
+            if self.dpad.u.fell:
+                return "trade"
+            elif self.dpad.d.fell:
+                return "sleep"
+        if self.dpad.x.fell:
+            self.thanks = not self.thanks
+        elif self.dpad.l.fell:
+            return "friends"
+        elif self.dpad.r.fell:
+            return "candies"
         return "home"
