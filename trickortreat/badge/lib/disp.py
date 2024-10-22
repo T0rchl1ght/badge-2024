@@ -28,7 +28,9 @@ class disp:
     def __init__(self,group,dpad):
         self.dpad = dpad
         self.group = group
-        self.body_text = ""
+        self.last_text = ""# keeps track of last-used text setting to know if it should re-draw
+        self.body_text = ""# last used text for setText  
+        self.select_body_text = ""# last setText method used, to know if we need to redraw.
         self.blankEndRows=True
 
         # Create a header and a text block area
@@ -144,7 +146,7 @@ class disp:
 
         # this block handles up down dpad presses, and makes sure to tell the calling function it's 
         # been handled
-        if self.body_text == input:
+        if self.body_text == input and self.last_text == "setText":
             if self.dpad.u.fell:
                 # stop at the top of text, no looping
                 if self.curTopRow <= 0: pass_dpad = True 
@@ -156,6 +158,8 @@ class disp:
                     self.curTopRow = self.curTopRow + __SCROLL 
                 else:
                     self.curTopRow = len(lines) - __ROWS if self.curTopRow - __ROWS >= 0  else 0
+            elif self.last_text != "setText":
+                pass
             else:
                 # if input is the same and we didn't get a dpad, do nothing
                 # empty our locals and garbage collect
@@ -164,6 +168,7 @@ class disp:
                 return pass_dpad
         else:
             # reset for new text to display
+            self.last_text = "setText"
             self.curTopRow = 0
             self.body_text = input
         self.hide_all()
@@ -208,7 +213,8 @@ class disp:
                 - dpad left/right result
         """
         # Sort out any dpad motions
-        if self.body_text == input:
+        # using a sepatate select_body_text means we won't lose cursor position 
+        if self.select_body_text == input:
             if self.dpad.u.fell:
                 # cursorRow up until 0, curTopRow up until 0, no wrap
                 # move cursor up one
@@ -246,20 +252,19 @@ class disp:
                         self.curTopRow += 1
                         self.cursorRow = 1
                         
-#                if self.cursorRow >= 2:
-#                    self.curTopRow = self.curTopRow + 1 if self.curTopRow + 2 > len(input) else len(input) - 3
-#                    self.cursorRow = 2  # cursorRow should never be above 2, this is a safety only
-#                    scroll = True
-#                else:
-#                    self.cursorRow = self.cursorRow + 1 if self.cursorRow < len(input) - 1 else len(input) - 1
             elif self.dpad.x.fell:
                 return self.curTopRow + self.cursorRow
+
+            elif self.last_text != "setTextGetSelect":
+                pass
+
             else:
                 # nothing changed, no inputs, give a "nothing selected" answer
                 return -1
         else:
             if DEBUG: print("[disp.setTextGetSelect] {}".format(input))
-            self.body_text = input 
+            self.last_text = "setTextGetSelect"
+            self.select_body_text = input
             self.curTopRow = 0
             self.cursorRow = 0
 
@@ -323,6 +328,7 @@ class disp:
         X = 0
         Y = 1
         self.hide_all()
+        self.last_text == "setTextCursor"
         if DEBUG: print("[disp.setTextCursor] cursor: ({})\tinput: {}".format(cursor, input))
 
         if type(input) is str:
