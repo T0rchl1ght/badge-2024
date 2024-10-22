@@ -20,7 +20,6 @@ class game_data:
     #initialize all the data. Read all 3 files and load into memory
     def __init__(self):
         self.pubkey=self.read_pubkey()
-        print(self.pubkey)
         self.read_id()
         self.read_friends()
         self.read_candies()
@@ -70,7 +69,7 @@ class game_data:
         self.write_id()
 
     def write_id(self):
-        return self.write_json({'name': self.myname, 'candy': self.mycandy, 'signature': self.mysig},idfile)
+        return self.write_json({'name': self.myname, 'candy': self.mycandy, 'signature': self.mysig},self.idfile)
 
     #friends is a dict of people we met and the candies they gave us
     def read_friends(self):
@@ -86,7 +85,6 @@ class game_data:
     #candies is a dict of candies an their signature
     def read_candies(self):
         self.candies=self.read_json(self.candyfile)
-        print(self.candies)
         self.candyTally={}
         for candy in self.candies.keys():
             self.count_candy(candy)
@@ -97,10 +95,10 @@ class game_data:
             self.candyTally[candy]+=1
         else:
             self.candyTally[candy]=1
-        print(self.candyTally)
 
     def wipe_candies(self):
         self.candies={}
+        self.candyTally={}
         self.write_candies()
 
     def write_candies(self):
