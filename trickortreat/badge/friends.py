@@ -12,32 +12,31 @@ class friends:
         self.dpad=dpad
         self.game=game
         self.friend_selected=0
-        print(self.game.friends)
 
         self.disp = l_disp
         self.details = False
 
     def update(self):
-        #there are 3 lines displayed. The middle line is the 'selected' one
-        #and has a > in front
-        friendNames=list(self.game.friends.keys())
-        currentFriendName=friendNames[self.friend_selected]
-        #self.group.hidden=False
-        scroll = False
-
-
-        if self.details:
-            # ToDo: Convert this into a pretty pop-up
-            self.disp.setHeader(currentFriendName)
-            scroll = self.disp.setText(currentFriendName + " gave you " + self.game.friends[currentFriendName])
+        if len(self.game.friends)==0:
+            self.disp.setHeader("Friends")
+            self.disp.setText("Go make some friends and collect candy!")
         else:
-            self.disp.setHeader("Friends")  # ToDo: it might be nice to show our own name here
-            scroll = self.friend_selected = self.disp.setTextGetSelect(friendNames)
-            if self.friend_selected >= 0:
-                print("[friends] Selected item {} - {}".format(self.friend_selected, friendNames[self.friend_selected]))
-                self.details = True
-                # skip processing dpad, so we will display the right thing in the next loop
-                return "friends"
+            friendNames=list(self.game.friends.keys())
+            currentFriendName=friendNames[self.friend_selected]
+            #self.group.hidden=False
+
+            if self.details:
+                # ToDo: Convert this into a pretty pop-up
+                self.disp.setHeader(currentFriendName)
+                self.disp.setText(currentFriendName + " gave you " + self.game.friends[currentFriendName])
+            else:
+                self.disp.setHeader("Friends")  # ToDo: it might be nice to show our own name here
+                self.friend_selected = self.disp.setTextGetSelect(friendNames)
+                if self.friend_selected >= 0:
+                    print("[friends] Selected item {} - {}".format(self.friend_selected, friendNames[self.friend_selected]))
+                    self.details = True
+                    # skip processing dpad, so we will display the right thing in the next loop
+                    return "friends"
 
         if self.dpad.l.fell:
             #self.group.hidden=True
