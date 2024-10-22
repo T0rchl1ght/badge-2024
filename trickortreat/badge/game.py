@@ -33,12 +33,13 @@ class game_data:
         return PublicKey(*read_json(keyfile)["public_key_arguments"])
 
     #pretty much the same thing over and over
-    def read_json(self,file):
+    def read_json(self,filename):
         try:
-            with open(file, "r") as f:
+            with open(filename, "r") as f:
+                print("loaded file",filename)
                 return json.loads(f.read())
         except OSError:
-            print("error reading",file)
+            print("error reading",filename)
             return {}
     
     def write_json(self,mydict,file):
@@ -85,6 +86,18 @@ class game_data:
     #candies is a dict of candies an their signature
     def read_candies(self):
         self.candies=self.read_json(self.candyfile)
+        print(self.candies)
+        self.candyTally={}
+        for candy in self.candies.keys():
+            self.count_candy(candy)
+
+    def count_candy(self,candy):
+        candy=candy[0:candy.find(" #")]
+        if candy in self.candyTally:
+            self.candyTally[candy]+=1
+        else:
+            self.candyTally[candy]=1
+        print(self.candyTally)
 
     def wipe_candies(self):
         self.candies={}
@@ -104,9 +117,11 @@ class game_data:
             verify(candy.encode(),a2b_base64(signature[1:]),self.pubkey)
         except:
             return("Invalid Signature")
-        self.friends[friend]=[candy]
+        self.friends[friend]=candy
         self.write_candies()
         self.candy[candy]=signature
+        self.write_candies()
+        self.count_candy(candy)
         return("Recieved ",candy,"from",friend)
 
 
