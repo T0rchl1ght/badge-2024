@@ -29,8 +29,8 @@ class disp:
         self.dpad = dpad
         self.group = group
         self.last_text = ""# keeps track of last-used text setting to know if it should re-draw
-        self.body_text = ""# last used text for setText  
-        self.select_body_text = ""# last setText method used, to know if we need to redraw.
+        self.body_text = None # last used text for setText  
+        self.select_body_text = None # last setText method used, to know if we need to redraw.
         self.blankEndRows=True
 
         # Create a header and a text block area
@@ -158,8 +158,6 @@ class disp:
                     self.curTopRow = self.curTopRow + __SCROLL 
                 else:
                     self.curTopRow = len(lines) - __ROWS if self.curTopRow - __ROWS >= 0  else 0
-            elif self.last_text != "setText":
-                pass
             else:
                 # if input is the same and we didn't get a dpad, do nothing
                 # empty our locals and garbage collect
@@ -216,46 +214,47 @@ class disp:
         # using a sepatate select_body_text means we won't lose cursor position 
         if self.select_body_text == input:
             if self.dpad.u.fell:
-                # cursorRow up until 0, curTopRow up until 0, no wrap
+                # cursorRow up until 0, selTopRow up until 0, no wrap
                 # move cursor up one
                 self.cursorRow -= 1
                 
                 #if that scrolls off top, move the view window up
                 if self.cursorRow < 0:
-                    self.curTopRow += self.cursorRow
+                    self.selTopRow += self.cursorRow
                     self.cursorRow = 0
 
                 #if view window is off the top, slide it to the top
-                if self.curTopRow < 0:
-                    self.curTopRow=0
+                if self.selTopRow < 0:
+                    self.selTopRow=0
                     #if we want a blank top line - then slide it up one
                     if self.blankEndRows:
-                        self.curTopRow = -1
+                        self.selTopRow = -1
                         self.cursorRow = 1
 
             elif self.dpad.d.fell:
-                # cursorRow down until 2, curTopRow down until full screen are last lines
+                # cursorRow down until 2, selTopRow down until full screen are last lines
                 # move cursor down one
                 rows = len(input)
                 self.cursorRow += 1
                 
                 #if that scrolls off bottom, move the view window down
                 if self.cursorRow > 2:
-                    self.curTopRow += 1
+                    self.selTopRow += 1
                     self.cursorRow = 2
 
                 #if view window is off the bottom, slide it to the bottom
-                if self.curTopRow > len(input)-3:
-                    self.curTopRow=rows-3
+                if self.selTopRow > len(input)-3:
+                    self.selTopRow=rows-3
                     #if we want a blank bottom line - then slide it down one
                     if self.blankEndRows:
-                        self.curTopRow += 1
+                        self.selTopRow += 1
                         self.cursorRow = 1
                         
             elif self.dpad.x.fell:
-                return self.curTopRow + self.cursorRow
+                return self.selTopRow + self.cursorRow
 
             elif self.last_text != "setTextGetSelect":
+                self.last_text = "setTextGetSelect"
                 pass
 
             else:
@@ -265,19 +264,15 @@ class disp:
             if DEBUG: print("[disp.setTextGetSelect] {}".format(input))
             self.last_text = "setTextGetSelect"
             self.select_body_text = input
-            self.curTopRow = 0
+            self.selTopRow = 0
             self.cursorRow = 0
 
-        print("Top row:",self.curTopRow,"\ncursor:",self.cursorRow)
-
         # ToDo: put in logic for a fancy line-wrap with prompting here
-        if self.curTopRow < 0:
+        if self.selTopRow < 0:
             lines = [""]
-            print(lines)
             lines += input[0:2]
         else: 
-            lines = input[self.curTopRow:self.curTopRow + 3]
-        print(lines)
+            lines = input[self.selTopRow:self.selTopRow + 3]
         for idx in range(0,len(lines)):
             if len(lines[idx]) > 18:
                 print("[disp.setTextGetSelect] Line too long (18 char limit): {}".format(lines[idx]))
@@ -287,10 +282,10 @@ class disp:
 
         self.hide_all()
         self.nav_x.hidden = False
-        if self.cursorRow > 0 or self.curTopRow > 0:
+        if self.cursorRow > 0 or self.selTopRow > 0:
             self.nav_u.hidden = False
-        # if (self.cursorRow < 2 or self.cursorRow < len(input) - 1) and self.curTopRow + 3 <= len(input):
-        if self.curTopRow + 3 <= len(input) or (self.curTopRow == 0 and self.cursorRow < len(input) - 1):
+        # if (self.cursorRow < 2 or self.cursorRow < len(input) - 1) and self.selTopRow + 3 <= len(input):
+        if self.selTopRow + 3 <= len(input) or (self.selTopRow == 0 and self.cursorRow < len(input) - 1):
             self.nav_d.hidden = False 
         
         self.cursor.text = ">"
