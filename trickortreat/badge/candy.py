@@ -17,24 +17,26 @@ class candies:
         self.details = False
 
     def update(self):
-        #there are 3 lines displayed. The middle line is the 'selected' one
-        #and has a > in front
         #there's a better solution than re-doing this every loop... maybe a separate "show()"?
-        candyNames=list(self.game.candyTally.keys())
-        currentCandyName=candyNames[self.candy_selected]
-        #self.group.hidden=False
-
-        if self.details:
-            self.disp.setHeader(currentCandyName)
-            self.disp.setText("You have "+str(self.game.candyTally[currentCandyName])+" "+currentCandyName)
-        else:
+        if len(self.game.candyTally)==0:
             self.disp.setHeader("Candies")  # ToDo: it might be nice to show our own name here
-            self.candy_selected = self.disp.setTextGetSelect(candyNames)
-            if self.candy_selected >= 0:
-                print("[candies] Selected item {} - {}".format(self.candy_selected, candyNames[self.candy_selected]))
-                self.details = True
-                # skip processing dpad, so we will display the right thing in the next loop
-                return "candies"
+            self.disp.setText("Go collect some candy and make some friends")
+        else:
+            candyNames=list(self.game.candyTally.keys())
+            currentCandyName=candyNames[self.candy_selected]
+            #self.group.hidden=False
+
+            if self.details:
+                self.disp.setHeader(currentCandyName)
+                self.disp.setText("You have "+str(self.game.candyTally[currentCandyName])+" "+currentCandyName)
+            else:
+                self.disp.setHeader("Candies")  # ToDo: it might be nice to show our own name here
+                self.candy_selected = self.disp.setTextGetSelect(candyNames)
+                if self.candy_selected >= 0:
+                    print("[candies] Selected item {} - {}".format(self.candy_selected, candyNames[self.candy_selected]))
+                    self.details = True
+                    # skip processing dpad, so we will display the right thing in the next loop
+                    return "candies"
 
         if self.dpad.l.fell:
             #self.group.hidden=True
