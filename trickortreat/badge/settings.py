@@ -65,23 +65,18 @@ class settings:
 
                 if self.x == 0:
                     print("Looking at sponsors rn")
-                    self.det.text="Thank you to our\nLeading Sponsors:\nAnthrop\nGoogle"
+                    self.det.text="Thank you to our\nPlatinum Sponsors:\n  SecuringHW.com"
                     self.details.hidden=False
                     time.sleep(1.2)
-                    self.det.text="Thank you to our\nLeading Sponsors:\nGoogle\nMicrosoft"
+                    self.det.text="Thank you to our\nPlatinum Sponsors:\n       BPM"
                     time.sleep(1.2)
-                    self.det.text="Thank you to our\nLeading Sponsors:\nMicrosoft\nSecureframe"
-                    time.sleep(1.2)
-                    self.det.text="Thank you to our\nLeading Sponsors:\nSecureframe\nWiz"
-                    time.sleep(1.2)
-                    self.det.text="Thank you to our\nLeading Sponsors:\nWiz"
+                    self.det.text="Thank you to our\nPlatinum Sponsors:\n     HackerOne"
                     time.sleep(1.2)
                     self.det.text="And a shout\nout to all of\nour voulunteers!"
                     time.sleep(2)
                     self.det.text="It was you that\nmade this all\npossible thank you"
                     time.sleep(2)
                     self.details.hidden=True
-
 
                 if self.x==1:
                     #advance to next led mode
