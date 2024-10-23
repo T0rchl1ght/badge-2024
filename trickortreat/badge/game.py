@@ -2,7 +2,7 @@ import circuitpython_csv
 import gc
 from binascii import crc32,a2b_base64
 import json
-from adafruit_rsa import PublicKey
+from adafruit_rsa import PublicKey, verify
 
 # this class contains all the data relevant to the game. It manages
 # loading the data from files, updating it, and writing it back.
@@ -53,16 +53,21 @@ class game_data:
     # clear name and write to file
     def read_id(self):
         myid=self.read_json(self.idfile)
-        if "name" in myid: self.myname=myid["name"]
         if "candy" in myid: self.mycandy=myid["candy"]
         if "signature" in myid: self.mysig=myid["signature"]
+        if "name" in myid: self.set_name(myid["name"])
+        set
 
+
+    def set_name(self,name):
+        self.myname=name  
         #calculate the message we'll send when we trade.
         transmit_data=bytearray(",".join([self.myname,self.mycandy,str(self.mysig)]),'utf8')
         #calculate CRC
         crc = hex(crc32(transmit_data))
         self.mytxval=transmit_data+bytearray(","+crc,'utf8')
         print(f"{self.mytxval}")
+        self.write_id()
 
     def wipe_id(self):
         self.myname=""
@@ -106,20 +111,23 @@ class game_data:
 
     #check a candy, and if valid for this game, add it to the structure.
     def check_candy(self,rxval):
+        print(rxval)
         if rxval.count(',') != 3:
-            return("Bad RX")
+            return("Invalid RX data")
         friend, candy, signature, chksum = rxval.split(',')
         if bytearray(hex(crc32(bytearray(",".join([friend,candy,signature]),'utf8'))),'utf8') != chksum:
             return("Invalid Checksum")
         try:
             verify(candy.encode(),a2b_base64(signature[1:]),self.pubkey)
-        except:
-            return("Invalid Signature")
+        except Exception as e:
+            return("Invalid Signature:",e)
+        if friend in self.friends:
+            return("You already got "+self.friends[friend]+" from "+friend)
         self.friends[friend]=candy
-        self.write_candies()
-        self.candy[candy]=signature
+        self.write_friends()
+        self.candies[candy]=signature
         self.write_candies()
         self.count_candy(candy)
-        return("Recieved ",candy,"from",friend)
+        return("Recieved "+candy+" from "+friend)
 
 

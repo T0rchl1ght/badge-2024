@@ -5,7 +5,7 @@ import digitalio
 #todo - add error checking
 
 class FakeIRDA:
-    def __init__(self,uart=busio.UART(board.TX, board.RX, baudrate=19200, receiver_buffer_size=64),sd=board.D8):
+    def __init__(self,uart=busio.UART(board.TX, board.RX, baudrate=19200, receiver_buffer_size=256),sd=board.D8):
         self.uart=uart
         self.iren=digitalio.DigitalInOut(sd)
         self.iren.switch_to_output()
