@@ -84,7 +84,7 @@ class trade:
                 #otherwise, show a timeout countdown
                 else:
                     #todo: bug here shows really high countdown values. usually after a failed recieve.
-                    self.disp.setText("receiving{}".format((self.timeout - ticks_ms()) // 1000))
+                    self.disp.setText("receiving {}".format((self.timeout - ticks_ms()) // 1000))
                     #print("nothing received yet",self.timeout,ticks_ms())
 
             #success, timeout, and error states don't have any following action - just wait for buttons
