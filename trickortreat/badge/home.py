@@ -109,11 +109,11 @@ class home:
     def update(self):
         # show contents, process keypresses
         # self.disp.hidden=False
-        header=self.event_name
+        #header=self.event_name
         body=["^ trade","< friends  candy >", "v sleep (x) more"]
 
         if self.thanks:
-            header="Sponsors"
+            #header=self.event_name
             body=self.game.myname+" is giving out "+self.game.mycandy
             
         self.disp.setHeader(header)
