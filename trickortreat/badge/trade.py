@@ -63,53 +63,43 @@ class trade:
             # receive state. listen until data received, then check it and proceed
             elif self.state == "receiving":
                 if self.ir.ready(4):
+                    print("incoming")
                     #4 bytes are in the queue - enough to get started. Get data
                     rxval=self.ir.readbytes()
-                    #print(f"RX: {rxval}")
-                    if rxval.count(',') == 4:
-                        self.rxname,self.game_num,self.rxcandy,self.rxsignature,chksum= rxval.split(',')
-                        print(f"RX: {chksum}, {self.rxcandy}, {self.rxname},{self.rxsignature}")
-                        try:
-                            #check crc is valid.
-                            if bytearray(hex(crc32(bytearray(",".join([self.rxname,self.game_num,self.rxcandy,self.rxsignature]),'utf8'))),'utf8') != chksum:
-                                print("[!] Invalid Checksum")
-                                self.state="error"
-                                self.disk.setText("receive error :(\n^ try again\nv cancel")
-                            #check signature
-                            elif verify(self.rxcandy.encode(),a2b_base64(self.rxsignature[1:]),self.game.pubkey):
-                                print("signature ok")
-                                if int(self.game_num) != int(self.game.game_num):
-                                    print("different game nums")
-                                    # self.disp.setText("Game # mismatch!\n< stay on game "+str(self.game.game_num)+"\n> move to game "+str(self.game_num)
-                                    self.disp.setText([
-                                        "Game # mismatch!!!",
-                                        "< stay on game {}".format(self.game.game_num),
-                                        "> move to to game {}".format(self.game_num)
-                                    ])
-                                    while True:
-                                        self.dpad.update()
-                                        if self.dpad.l.fell: break
-                                        if self.dpad.r.fell:
-                                            self.game.game_num=(self.game_num)
-                                            self.game.game_file="data/game"+str(self.game.game_num)+".csv"
-                                            self.game.read_candies()
-                                            break
-                                #check that strings are not none
-                                if (int(self.game_num) == int(self.game.game_num)) and self.rxcandy is not None and self.rxname is not None and self.game.check_candy(self.rxcandy, self.rxname):
-                                    #if the candy was valid, move to responding
-                                    print("received")
-                                    self.state="responding"
-                                    sleep(.5)
-                            else:
-                                #if candy was invalid, we got an error
-                                #todo: this should probably be retry since tx/rx is more robust now
-                                print("receive error")
-                                self.state="error"
-                                self.disp.setText(["error try again or","check your game #","^ again    v cancel"])
-                        except:
-                            print("we foiled the hackers!")
-                            self.state="error"
-                            self.disp.setText(["Bad Signature!","Ignoring cheap","forgery  ^  v"])
+                    print(f"RX: {rxval}")
+                    
+                    if self.game.check_candy(rxval):
+#                    if rxval.count(',') == 3:
+#                        self.rxname,self.rxcandy,self.rxsignature,chksum= rxval.split(',')
+#                        #print(f"RX: {chksum}, {self.rxcandy}, {self.rxname},{self.rxsignature}\n\n")
+#                        try:
+#                            print("trying!")
+#                            #check crc is valid.
+#                            print(bytearray(hex(crc32(bytearray(",".join([self.rxname,self.rxcandy,self.rxsignature]),'utf8'))),'utf8'), chksum,"\n\n")
+#                            chkval=bytearray(hex(crc32(bytearray(",".join([self.rxname,self.rxcandy,self.rxsignature]),'utf8'))),'utf8')
+#                            if bytearray(hex(crc32(bytearray(",".join([self.rxname,self.rxcandy,self.rxsignature]),'utf8'))),'utf8') != chksum:
+#                                print("[!] Invalid Checksum")
+#                                self.state="error"
+#                                self.disp.setText("receive error :(\n^ try again\nv cancel")
+#                            #check signature
+#                            elif verify(self.rxcandy.encode(),a2b_base64(self.rxsignature[1:]),self.game.pubkey):
+#                                print("verified\n")
+#                                #check that strings are not none
+#                                if self.rxcandy is not None and self.rxname is not None and self.game.check_candy(self.rxcandy, self.rxname):
+                        #if the candy was valid, move to responding
+                        print("received")
+                        self.state="responding"
+                        sleep(.5)
+                    else:
+                    #if candy was invalid, we got an error
+                    #todo: this should probably be retry since tx/rx is more robust now
+                        print("receive error")
+                        self.state="error"
+                        self.disp.setText(["error try again or","check your game #","^ again    v cancel"])
+#                        except Exception as e:
+#                            print("we foiled the hackers!, ",e)
+#                            self.state="error"
+#                            self.disp.setText(["Bad Signature!","Ignoring cheap","forgery  ^  v"])
                 #go to timeout if we've been waiting too long
                 elif ticks_ms()> self.timeout:
                     print("timeout")
@@ -134,9 +124,6 @@ class trade:
                     "said it wasn't",
                     "{}".format(self.rxcandy)
                 ])
-                if self.game.unsolved==0:
-                    self.state="solved"
-
 
             #success, timeout, and error states don't have any following action - just wait for buttons
 
