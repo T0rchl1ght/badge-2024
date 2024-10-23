@@ -22,21 +22,16 @@ WHITE=0xFFFFFF
 display=ssd1306ui()
 dpad=FiveWayPad()
 leds=led_control()
-gc.collect()
 
+#disp is the smart scroll-text display
 l_disp = disp(display.homegroup, dpad)
 
-#instantiate home first, since it manages OOB.
-# homepage=home(display.homegroup,dpad)
-homepage=home(l_disp, dpad)
-
-#next, load game data since we know we have a username
+#next, load game data including username
 game=game_data()
-homepage.game=game
-gc.collect()
 
-#finally, create the other view pages, most of which need to access
+#create the other view pages, most of which need to access
 #a single display group, dpad state, and game data
+homepage=home(l_disp, dpad, game)
 candies_page=candies(l_disp,dpad,game)
 settings_page=settings(display.settingsgroup,dpad,game,leds,l_disp)
 friends_page=friends(l_disp,dpad,game)
