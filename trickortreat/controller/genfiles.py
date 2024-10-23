@@ -204,6 +204,9 @@ def nukecpy(device):
 rpicount=0
 cpycount=0
 nukemode=False
+if len(sys.argv)==2 and sys.argv[1] == "nuke":
+    nukemode=True
+    print("starting in nuke mode!! next device will get wiped!")
 # listen for device actions
 for device in iter(monitor.poll, None):
     if device.action == 'add':
