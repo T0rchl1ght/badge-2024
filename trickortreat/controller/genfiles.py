@@ -146,6 +146,15 @@ def umountpoint(mountpoint):
     subprocess.run(cmd,shell=True)
     #print(mountpoint, " unmounted - unplug it")
 
+# copy this file from the badge at this mount point to a unique file locally:
+def copyfromdevice(file, mountpoint):
+    src=mountpoint+"/"+file
+    dest="-".join([time.strftime("%Y%m%d-%H%M%S-"),device.get('ID_SERIAL_SHORT'),file])
+    #print("copying from ", src, "to", dest)
+    cmd="cp -Lr "+src+" "+dest
+    subprocess.run(cmd,shell=True)
+    return dest
+
 # copy this file to the badge at this mount point 
 def copytodevice(file, mountpoint):
     #print("copying ", file, " to ", mountpoint)
@@ -234,31 +243,45 @@ for device in iter(monitor.poll, None):
             Thread(target=mkrpi, args=(device,)).start()
         if label=="CIRCUITPY":
 
-            if checkmode:
+            if checkmode:   #jjf put all this in a separate function checkcandy(device) 
                 mountpoint=mountnode(device.device_node)
-                assignedCandyLocation="candies.json"
-                ledgerLocation=mountpoint+'/candies.json'
+                copyfromdevice("id.json",mountpoint)
+                copyfromdevice("candies.json",mountpoint)
+                assignedCandyLocation="candies.json"        #jjf this is already loaded in allcandies{}
+                ledgerLocation=mountpoint+'/candies.json'     #jjf put this assignment up near gamefiles
                 with open(assignedCandyLocation,"r") as f:
                     assignedCandyData=json.load(f)
 
 
-                with open(ledgerLocation,"r") as f:
+#jjf check if file exists before opening
+#also, better to copy it locally so we can data horde, and not trigger restarts on badge by keeping the file open for a long time.
+#i added copyfromdevice above; I'd recommend calling that then opening the local filename it returns.
+                with open(ledgerLocation,"r") as f:        
                     badgeCandyData=json.load(f)
+
+
+                umountpoint(mountpoint)
+                    
+#jjf need to umountpoint when done with the badge
+
 
                 candy_counter = {}
                 unique_signatures = set()
 
-                for badgeCandy, badgeSignature in badgeCandyData.items():
+                for badgeCandy, badgeSignature in badgeCandyData.items():   
                     valid=False
                     for assignedCandy, assignedSignature in assignedCandyData.items():
+#jjf 2 loops makes this an n^2 operation. Take advantage of the dictionary - allcandies.get(assignedCandy) 
+# will return the assigned signature or None if there isn't one. you can compare that to badgeSignature
                         if ((badgeCandy == assignedCandy) & (badgeSignature == assignedSignature)):
                             # Extract the candy name without the increment (e.g., "Sour Patch Kids" instead of "Sour Patch Kids #1")
                             candy_name = badgeCandy.rsplit(' ', 1)[0]
 
                             # Update the candy count
+# jjf candies[] contains all the unique candies - candycounter=dict.fromkeys(candies,0) will initialize them all to 0
                             if candy_name not in candy_counter:
                                 candy_counter[candy_name] = 0
-                            candy_counter[candy_name] += 1
+                            candy_counter[candy_name] += 1      #jjf note that this will count duplicate signatures as more candy
 
                             # Check if the signature is unique and add it to the set if it is
                             if badgeSignature not in unique_signatures:
@@ -271,11 +294,13 @@ for device in iter(monitor.poll, None):
                         print(f"{badgeCandy} seemed to be invalid...")
 
                 # Print the candy counts
-                print("\nCandy Collection Summary:")
+                print("\nCandy Collection Summary:")            #jjf would be great to add their name here
                 for candy, count in candy_counter.items():
                     print(f"{candy}: {count}")
-            
 
+#jjf print some when done to make the output more clear and differentiate it from the last one
+#jjf add a prompt to tell them to insert another powered-on badge - if the badge is battery powered but asleep - nothing will happen
+            
                 continue
             if nukemode:
                 # badge running circuitpython and we want to reboot it in uf2 mode to nuke
