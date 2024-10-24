@@ -5,7 +5,7 @@ import sys
 import binascii
 import adafruit_rsa
 import json
-from math import ceil
+from math import ceil, log10
 import pyudev
 import time
 import subprocess
@@ -19,7 +19,7 @@ import hashlib
 # todo: parameterize the file load/unload/generate
 
 candies=["Sour Patch Kids","Haribo Gummies","Smarties","Reese's Cups","Twix","Snickers"]
-badge_count=20
+badge_count=20  #overestimate this! Actually, maybe it shouldn't be settable? maybe dynamic? hmm.
 hash_method="SHA-256"
 
 #if keys are present, load them. if not, generate them
@@ -28,9 +28,9 @@ try:
         private_obj = json.loads(f.read())
         private_key=adafruit_rsa.PrivateKey(*private_obj["private_key_arguments"])
         public_key=adafruit_rsa.PublicKey(private_key.n, private_key.e)
-    print("1. Prior keys loaded from priv.json.")
+    print("\n1. Prior keys loaded from priv.json.")
 except Exception as e:
-    if input("no keys found, generate them? 'yes' to continue, anything else to quit\n") != "yes":
+    if input("\nNo keys found, generate them? 'yes' to continue, anything else to quit\n") != "yes":
         exit(1)
     #remove all other config files, or set flag?
     print("1. Generating new keys...")
@@ -55,9 +55,9 @@ try:
     with open("seed.txt", 'r') as file:
         seed = file.read()
         random.seed(seed)
-    print("2. Prior seed loaded from seed.txt.")
+    print("\n2. Prior seed loaded from seed.txt.")
 except Exception as e:
-    if input("no random seed found, generate one? 'yes' to continue, anything else to quit\n") != "yes":
+    if input("\nNo random seed found, generate one? 'yes' to continue, anything else to quit\n") != "yes":
         exit(1)
     print("2. Choosing new random seed... ")
     seed = random.randrange(sys.maxsize)
@@ -74,15 +74,16 @@ signatures={}
 try:
     with open("candies.json", 'r') as f:
         signatures = json.loads(f.read())
-    print("3. Prior candies loaded from candies.json.")
+    print("\n3. Prior candies loaded from candies.json.")
 except Exception as e:
-    if input("no candy signatures found, generate them? 'yes' to continue, anything else to quit\n") != "yes":
+    if input("\nNo candy signatures found, generate them? 'yes' to continue, anything else to quit\n") != "yes":
         exit(1)
     print("3. Generating new candy signatures..")
-    candy_count=ceil(badge_count/len(candies))
-    for i in range(candy_count):
+    candyCount=ceil(badge_count/len(candies))
+    maxCandy=10**ceil(log10(candyCount))-1
+    for i in range(candyCount):
         for candy in candies:
-            unique_candy=candy + " #" + str(i)
+            unique_candy=candy + " #" + str(maxCandy-i)
             signatures[unique_candy]=str(binascii.b2a_base64(adafruit_rsa.sign(unique_candy.encode(), private_key, hash_method)))
     with open("candies.json", "w") as f:
         f.write(json.dumps(signatures))
@@ -94,15 +95,15 @@ assignments={}
 try:
     with open("assignments.json", 'r') as f:
         assignments = json.loads(f.read())
-    print("4. Prior assignments loaded from assignments.json.")
+    print("\n4. Prior assignments loaded from assignments.json.")
 except Exception as e:
-    if input("no prior assignments found, start from scratch? 'yes' to continue, anything else to quit\n") != "yes":
+    if input("\nNo prior assignments found, start from scratch? 'yes' to continue, anything else to quit\n") != "yes":
         exit(1)
     print("4. New assignments log ready...")
 
 allcandies=list(signatures.keys())
 
-print("keys, candies, and signatures loaded. Entering flashing mode. Plug in some badges!!\n")
+print("\nKeys, candies, and signatures loaded. Entering flashing mode. \n\nPlug in some badges!!\n")
 
 context = pyudev.Context()
 monitor = pyudev.Monitor.from_netlink(context)
@@ -116,6 +117,7 @@ gamefiles="../badge/*"
 def registerserial(sn,dest):
     # if a new serial, assign the next candy
     if sn not in assignments:
+        #todo: handle overflow here - more than the max # of badges seen!
         candyid=allcandies[len(assignments)]
         print(sn+" now assigned to give out "+candyid)
         assignments[sn]=candyid
