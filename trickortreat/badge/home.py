@@ -109,7 +109,7 @@ class home:
     def update(self):
         # show contents, process keypresses
         # self.disp.hidden=False
-        #header=self.event_name
+        header=self.event_name
         body=["^ trade","< friends  candy >", "v sleep (x) more"]
 
         if self.thanks:
