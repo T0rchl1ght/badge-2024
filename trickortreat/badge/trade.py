@@ -41,7 +41,7 @@ class trade:
 
     def update(self):
         #show trade page
-        self.disp.setHeader("Trade")
+        self.disp.setHeader(" ^ to retransmit")
 
         while True:
             #turn on the PHY to enable tx/rx
@@ -50,7 +50,7 @@ class trade:
             # Transmit state. Transmit the pre-calculated tx value
             if self.state == "transmitting":
                 print("transmitting")
-                self.disp.setText("tranmitting...")
+                self.disp.setText("transmitting...")
                 self.ir.writebytes(self.game.mytxval)
                 #tx complete; prepare to rx. Clear buffer and set timeout
                 self.ir.uart.reset_input_buffer()

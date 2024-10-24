@@ -23,7 +23,7 @@ class home:
 
         # ToDo: Break out the instructions message into a config item
         if self.game.myname == "":
-            self.showAndWait("Welcome to BSides PDX Trick or Treat! Press any button.")
+            self.showAndWait("Welcome to BSides PDX Trick or Treat! Press the button.")
             self.showAndWait( ["5-way       (^)", "d-pad    (<)(x)(>)", "buttons:    (v)"])
             self.showAndWait(["Pick a", "name/handle", "to share"])
             self.showAndWait(["(<)(>)(^)(v) to", "highlight a letter", "(x) to select"])
