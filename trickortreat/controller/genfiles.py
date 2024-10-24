@@ -209,6 +209,13 @@ nukemode=False
 if len(sys.argv)==2 and sys.argv[1] == "nuke":
     nukemode=True
     print("starting in nuke mode!! next device will get wiped!")
+
+checkmode=False
+if len(sys.argv)==2 and sys.argv[1] == "check":
+    checkmode=True
+    print("starting in checkout mode!")
+
+
 # listen for device actions
 for device in iter(monitor.poll, None):
     if device.action == 'add':
@@ -226,6 +233,50 @@ for device in iter(monitor.poll, None):
             print("RPI #",str(rpicount),"\n")
             Thread(target=mkrpi, args=(device,)).start()
         if label=="CIRCUITPY":
+
+            if checkmode:
+                mountpoint=mountnode(device.device_node)
+                assignedCandyLocation="candies.json"
+                ledgerLocation=mountpoint+'/candies.json'
+                with open(assignedCandyLocation,"r") as f:
+                    assignedCandyData=json.load(f)
+
+
+                with open(ledgerLocation,"r") as f:
+                    badgeCandyData=json.load(f)
+
+                candy_counter = {}
+                unique_signatures = set()
+
+                for badgeCandy, badgeSignature in badgeCandyData.items():
+                    valid=False
+                    for assignedCandy, assignedSignature in assignedCandyData.items():
+                        if ((badgeCandy == assignedCandy) & (badgeSignature == assignedSignature)):
+                            # Extract the candy name without the increment (e.g., "Sour Patch Kids" instead of "Sour Patch Kids #1")
+                            candy_name = badgeCandy.rsplit(' ', 1)[0]
+
+                            # Update the candy count
+                            if candy_name not in candy_counter:
+                                candy_counter[candy_name] = 0
+                            candy_counter[candy_name] += 1
+
+                            # Check if the signature is unique and add it to the set if it is
+                            if badgeSignature not in unique_signatures:
+                                unique_signatures.add(badgeSignature)
+                                print(f"Candy: {badgeCandy}\nSignature: {badgeSignature}\n")
+                                valid = True
+                            else:
+                                print(f"Duplicate signature found for {badgeCandy} and ignored.\n")
+                    if valid == False:
+                        print(f"{badgeCandy} seemed to be invalid...")
+
+                # Print the candy counts
+                print("\nCandy Collection Summary:")
+                for candy, count in candy_counter.items():
+                    print(f"{candy}: {count}")
+            
+
+                continue
             if nukemode:
                 # badge running circuitpython and we want to reboot it in uf2 mode to nuke
                 print("Nuking flash on CPY at",device.device_node,"\n")
