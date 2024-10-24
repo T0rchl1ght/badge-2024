@@ -19,7 +19,7 @@ import hashlib
 # todo: parameterize the file load/unload/generate
 
 candies=["Sour Patch Kids","Haribo Gummies","Smarties","Reese's Cups","Twix","Snickers"]
-badge_count=20  #overestimate this! Actually, maybe it shouldn't be settable? maybe dynamic? hmm.
+badge_count=900  #overestimate this! Actually, maybe it shouldn't be settable? maybe dynamic? hmm.
 hash_method="SHA-256"
 
 #if keys are present, load them. if not, generate them
