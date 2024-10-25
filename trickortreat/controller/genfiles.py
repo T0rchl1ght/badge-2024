@@ -105,7 +105,10 @@ except Exception as e:
 
 allcandies=list(signatures.keys())
 
-print("\nKeys, candies, and signatures loaded. Entering flashing mode. \n\nPlug in some badges!!\n")
+print("\nKeys, candies, and signatures loaded. Entering flashing mode.")
+print("if mounting gets messy, run the following line to clear out stale mountpoints in /media/\n")
+print("    sudo umount /media/sd*; sudo rm /media/sd*/.created_by_pmount; sudo rmdir /media/sd*")
+print("\n\nNow, plug in some badges!!\n")
 
 context = pyudev.Context()
 monitor = pyudev.Monitor.from_netlink(context)
