@@ -5,7 +5,7 @@ import sys
 import binascii
 import adafruit_rsa
 import json
-from math import ceil, log10
+from math import ceil, log10, floor
 import pyudev
 import time
 import subprocess
@@ -20,7 +20,9 @@ import hashlib
 
 candies=["Sour Patch Kids","Haribo Gummies","Smarties","Reese's Cups","Twix","Snickers"]
 badge_count=900  #overestimate this! Actually, maybe it shouldn't be settable? maybe dynamic? hmm.
+exchange_ratio=5 #how many unique signatures can be redeemed for real candy
 hash_method="SHA-256"
+checkdir="./checkdir/" #path to store check files
 
 #if keys are present, load them. if not, generate them
 try:
@@ -149,10 +151,12 @@ def umountpoint(mountpoint):
 # copy this file from the badge at this mount point to a unique file locally:
 def copyfromdevice(file, mountpoint):
     src=mountpoint+"/"+file
-    dest=device.get('ID_SERIAL_SHORT')+time.strftime("%Y%m%d-%H%M%S")+file
+    if not os.path.exists(src): return False
+    dest=checkdir+"-".join([time.strftime("%Y%m%d-%H%M%S-"),device.get('ID_SERIAL_SHORT'),file])
     #print("copying from ", src, "to", dest)
     cmd="cp -Lr "+src+" "+dest
     subprocess.run(cmd,shell=True)
+    if not os.path.exists(dest): return False
     return dest
 
 # copy this file to the badge at this mount point 
@@ -211,54 +215,85 @@ def nukecpy(device):
     umountpoint(mountpoint)
     print("Nuking CPY took "+str(time.time()-start)+"si\n")
 
-def checkCandy(device):
-    assignedCandyLocation="candies.json"        #jjf this is already loaded in allcandies{}
-    ledgerLocation=device+'/candies.json'     #jjf put this assignment up near gamefiles
-    if not os.path.exists(assignedCandyLocation):
-        raise FileNotFoundError(f"{assignedCandyLocation} does not exist locally.")
-    if not os.path.exists(ledgerLocation):
-        raise FileNotFoundError(f"{ledgerLocation} does not exist on the badge.")
-    with open(assignedCandyLocation,"r") as f:
-        assignedCandyData=json.load(f)
+def countCandy(filename, verbose=False):
 
-#also, better to copy it locally so we can data horde, and not trigger restarts on badge by keeping the file open for a long time.
-#i added copyfromdevice above; I'd recommend calling that then opening the local filename it returns.
-    with open(ledgerLocation,"r") as f:        
+    if verbose: print("Counting candy in "+filename+":")
+    unique_signatures = set()
+    candy_counter = dict.fromkeys(candies,0)
+
+    #check file exists and open it
+    if (filename is False) or (not os.path.exists(filename)):
+        return candy_counter
+    
+    with open(filename,"r") as f:
         badgeCandyData=json.load(f)
 
-    candy_counter = {}
-    unique_signatures = set()
-
-    for badgeCandy, badgeSignature in badgeCandyData.items():   
-        valid=False
-        for assignedCandy, assignedSignature in assignedCandyData.items():
-#jjf 2 loops makes this an n^2 operation. Take advantage of the dictionary - allcandies.get(assignedCandy) 
-# will return the assigned signature or None if there isn't one. you can compare that to badgeSignature
-            if ((badgeCandy == assignedCandy) & (badgeSignature == assignedSignature)):
+    for badgeCandy, badgeSignature in badgeCandyData.items():
+        # if this candy's signature matches our record
+        if badgeSignature==signatures.get(badgeCandy):
+            # Check if the signature is unique and add it to the set if it is
+            if badgeSignature in unique_signatures:
+                if verbose: print(f"Duplicate signature found for {badgeCandy} and ignored.\n")
+            else:
+                unique_signatures.add(badgeSignature)
+                # Update the candy count
                 # Extract the candy name without the increment (e.g., "Sour Patch Kids" instead of "Sour Patch Kids #1")
                 candy_name = badgeCandy.rsplit(' ', 1)[0]
+                candy_counter[candy_name] += 1
+                if verbose: print(f"{badgeCandy} validated. {candy_name} so far: {candy_counter[candy_name]}")
+        elif verbose:
+            print(f"{badgeCandy} is a counterfeit!")
+            badFriend ="somebody"
+            if badgeCandy in badgeFriends.values():
+                badFriend =list(badgeFriends.keys())[list(badgeFriends.values()).index(badgeCandy)]
+            print(badFriend, "gave you counterfeit", badgeCandy)
+    return candy_counter
 
-                # Update the candy count
-# jjf candies[] contains all the unique candies - candycounter=dict.fromkeys(candies,0) will initialize them all to 0
-                if candy_name not in candy_counter:
-                    candy_counter[candy_name] = 0
-                candy_counter[candy_name] += 1      #jjf note that this will count duplicate signatures as more candy  #Smiley I tested it and didn't see that happening. That is what I thought though too.
 
-                # Check if the signature is unique and add it to the set if it is
-                if badgeSignature not in unique_signatures:
-                    unique_signatures.add(badgeSignature)
-                    print(f"Candy: {badgeCandy}\nSignature: {badgeSignature}\n")
-                    valid = True
-                else:
-                    print(f"Duplicate signature found for {badgeCandy} and ignored.\n")
-        if valid == False:
-            print(f"{badgeCandy} seemed to be invalid...")
+def checkCandy(device):
+    print("\n\nBadge attached. Reading:")
+    # previous candy count - before we make a new file!
+    sn=0
+    sn=device.get('ID_SERIAL_SHORT')
+    previousfile="0"
+    for filename in os.scandir(checkdir):
+        #if the filename matches the serial number, and is greater than the last, it's more recent
+        if filename.name.find(sn+"-candies.json")>=0 and filename.name > previousfile:
+            #print(filename.name,"is newer than", previousfile)
+            previousfile=filename.name
+    if previousfile != "0": print("Previous file found: "+previousfile)
 
-    # Print the candy counts
-    print("\nCandy Collection Summary:")            #jjf would be great to add their name here
-    for candy, count in candy_counter.items():
-        print(f"{candy}: {count}")
-    umountpoint(device)
+    # connect, copy, and unmount badge
+    mountpoint=mountnode(device.device_node)
+    idFile=copyfromdevice("id.json",mountpoint)
+    candiesFile=copyfromdevice("candies.json",mountpoint)
+    friendsFile=copyfromdevice("friends.json",mountpoint)
+    umountpoint(mountpoint)
+    
+    # Get userame
+    badgeName="Candy Collection Summary"
+    if (idFile is not False): 
+        with open(idFile,"r") as f:        
+            badgeId=json.load(f)
+            badgeName=badgeId["name"]+"'s "+badgeName
+
+    #count candies
+    newCandyCount=countCandy(candiesFile,verbose=True)
+    oldCandyCount=countCandy(checkdir+previousfile,verbose=False)
+
+    print("\n\n|---------------------------------------------------------------------------|")
+    print('|{:^75s}|'.format(badgeName))
+    print("|---------------------------------------------------------------------------|")
+    print("|       Candy       | oldcount | newcount | oldpieces | newpieces |  payout |")
+    print("|---------------------------------------------------------------------------|")
+    for candy in newCandyCount.keys():
+        old=oldCandyCount[candy]
+        oldPieces=floor(old/exchange_ratio)
+        newPieces=floor(old/exchange_ratio)
+        new=newCandyCount[candy]
+        print(f"| {candy:18}|{old:9} |{new:9} |{oldPieces:10} |{newPieces:10} |{newPieces-oldPieces:8} |")
+    print("|---------------------------------------------------------------------------|")
+
 
 rpicount=0
 cpycount=0
@@ -290,10 +325,9 @@ for device in iter(monitor.poll, None):
             print("RPI #",str(rpicount),"\n")
             Thread(target=mkrpi, args=(device,)).start()
         if label=="CIRCUITPY":
-
             if checkmode:
-                checkCandy(mountnode(device.device_node))
-                print("All done! Ready for another badge\n Make sure it is powered on before it is plugged in or it will not be recognized")
+                checkCandy(device)
+                print("\nAll done! Ready for another badge\nMake sure it is powered on before it is plugged in or it will not be recognized")
                 continue
 
             if nukemode:
@@ -308,14 +342,21 @@ for device in iter(monitor.poll, None):
             print("CPY #",str(cpycount))
             Thread(target=mkcpy, args=(device,)).start()
         if label=="CLEAR":
+            # todo: run this on exit!
             # plugging in a usb drive with the volume label "CLEAR" will pumount all pmounted devices
             cmd="ls -lah /media/"
             subprocess.run(cmd,shell=True)
             print("unmounting\n")
             for filename in os.scandir("/media/"):
-                umountpoint(filename.path)
-                print(filename)
+                if filename.name.startswith("sd"):
+                    #umountpoint(filename.path)
+                    print(filename.path)
+                    subprocess.run(f"sudo umount {filename.path} || sudo rm {filename.path}/.created_by_pmount || sudo rmdir {filename.path}",shell=True)
             subprocess.run(cmd,shell=True)
+            #these require sudo
+            #subprocess.run("rm /media/sd?1/.created_by_pmount",shell=True)
+            #subprocess.run("rmdir /media/sd*",shell=True)
+            print("run the following to clear files: \n\n\nsudo rm /media/sd?1/.created_by_pmount\nrmdir /media/sd*")
         if label=="NUKE":
             # plugging in a usb drive with the volume label "NUKE" will completely zero the flash of the next badge found
             nukemode=True
